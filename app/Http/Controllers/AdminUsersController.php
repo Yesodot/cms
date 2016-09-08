@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UsersRequest;
 use App\User;
 use App\Role;
+use App\Photo;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
@@ -50,17 +51,43 @@ class AdminUsersController extends Controller
     public function store(UsersRequest $request)
     {
 
-        User::create([
-            'name' => $request->get('name'),
-            'email' => $request->get('email'),
-            'role_id' => $request->get('role_id'),
-            'is_active' => $request->get('is_active'),
-            'password' => bcrypt($request->get('password'))
-        ]);
+// Option to create it on field level rather than using the all() method
+//        User::create([
+//            'name' => $request->get('name'),
+//            'email' => $request->get('email'),
+//            'role_id' => $request->get('role_id'),
+//            'is_active' => $request->get('is_active'),
+//            'photo_id' => $request->get('photo_id'),
+//            'password' => bcrypt($request->get('password'))
+//        ]);
+
+
+        $input = $request->all();
+
+        if($file = $request->file('photo_id')){
+            $name = time() . $file->getClientOriginalName();
+
+            $file->move('images', $name);
+
+            $photo = Photo::create(['file' => $name]);
+
+            $input['photo_id'] = $photo->id;
+
+        }
+
+        $input['password'] = bcrypt($request->password);
+
+        User::create($input);
+
+        return redirect('admin/users');
+
+//        if($request->file('photo_id')){
+//            return "nissan";
+//        }
 
         //User::create($request->all());
 
-        return redirect('admin/users');
+
 
 //        return $request->all();
 
