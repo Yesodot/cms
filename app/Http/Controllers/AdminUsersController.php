@@ -10,6 +10,8 @@ use App\Photo;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Session;
 
 class AdminUsersController extends Controller
 {
@@ -21,9 +23,6 @@ class AdminUsersController extends Controller
     public function index()
     {
         $users = User::all();
-
-
-
 
         return view('admin.users.index', compact('users'));
     }
@@ -175,6 +174,47 @@ class AdminUsersController extends Controller
      */
     public function destroy($id)
     {
-        //
+
+        $user = User::findOrFail($id);
+
+        unlink('C:\xampp\htdocs\/'. $user->photo->file);
+        $user->delete();
+        Session::flash('deleted_user', 'The user has been deleted');
+        return redirect('/admin/users');
+
+
+
+
+        //        $user = User::findOrFail($id);
+//
+//        // Find the photo name of the poto table using the photo_id from the user table
+//        $photo_id = $user->photo_id;
+//        $photo_name = Photo::findOrFail($photo_id);
+//        echo $photo_name->file;
+//        dd($photo_name);
+
+
+
+//        $image = $user->photo->file;
+//        $base_path = 'C:\xampp\htdocs\codehacking\public\images\\' . $image;
+//        echo $base_path;
+////        $path = realpath($base_path);
+
+        //      dd($path);
+
+//        unlink('C:\xampp\htdocs\codehacking\public\images\1473309473Fotolia_51282384_M.jpg');
+//
+//        $user->delete();
+//
+//        Session::flash('deleted_user', 'The user has been deleted');
+//
+//        return redirect('/admin/users');
+
+
+
+
+
+
+
     }
 }
