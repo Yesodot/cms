@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Http\Requests\PostsCreateRequest;
 use App\Photo;
 use App\Post;
+use App\User;
 use App\Category;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 
 class AdminPostsController extends Controller
 {
@@ -107,7 +109,13 @@ class AdminPostsController extends Controller
      */
     public function edit($id)
     {
-        //
+
+        $post = Post::findOrFail($id);
+
+        $categories = Category::lists('name', 'id')->all();
+
+        return view('admin/posts/edit', compact('post', 'categories'));
+
     }
 
     /**
@@ -119,7 +127,34 @@ class AdminPostsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        //get the request
+        $input = $request->all();
+
+        //Check if a photo was submitted
+        if($file = $request->file['photo_id']){
+
+            // Get file name
+            $name = time() . $file->getClientOriginalName();
+
+            // Move the file
+            $file->move('images', $name);
+
+            // Create the file
+            $photo = Photo::create(['file' => $name]);
+
+            // Update file name
+            $input['photo_id'] = $photo->id;
+
+
+        }
+
+        Auth::user()->posts()->whereId($id)->first()->update($input);
+
+        // return the view
+        return redirect('/admin/posts');
+
+
+
     }
 
     /**
@@ -130,6 +165,25 @@ class AdminPostsController extends Controller
      */
     public function destroy($id)
     {
-        //
+        //Find the record in the database
+        $post = Post::findOrFail($id);
+
+        //dd($post);
+        //Delete the associated image
+        if($post['photo_id']){
+            unlink('C:\xampp\htdocs\/'. $post->photo->file);
+        }
+        // Delete the post
+        $post->delete();
+
+
+
+        //Set flash data
+        //Session::flash('deleted_post', 'The post was deleted successfully');
+
+
+        //Return to a specific view
+        return redirect('/admin/posts');
+
     }
 }

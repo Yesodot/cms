@@ -67,7 +67,7 @@ class AdminUsersController extends Controller
         if($file = $request->file('photo_id')){
             $name = time() . $file->getClientOriginalName();
 
-            $file->move('admin/images', $name);
+            $file->move('images', $name);
 
             $photo = Photo::create(['file' => $name]);
 
@@ -177,7 +177,10 @@ class AdminUsersController extends Controller
 
         $user = User::findOrFail($id);
 
-        unlink('C:\xampp\htdocs\/'. $user->photo->file);
+        if($user['photo_id']){
+            unlink('C:\xampp\htdocs\/'. $user->photo->file);
+        }
+
         $user->delete();
         Session::flash('deleted_user', 'The user has been deleted');
         return redirect('/admin/users');
